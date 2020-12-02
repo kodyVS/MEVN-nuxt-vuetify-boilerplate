@@ -28,8 +28,11 @@ export const actions = {
     } catch (error) {
       const snackBarData = {
         isError: true,
-        message: error.response.data.message,
+        message: "Error in connecting to the server",
       };
+      if (error.response) {
+        snackBarData.message = error.response.data.message;
+      }
       vuexContext.commit("snackBar", snackBarData, { root: true });
       return "error";
     }
@@ -59,19 +62,26 @@ export const actions = {
             throw error;
           });
       } catch (error) {
+        const snackBarData = {
+          isError: true,
+          message: "Error connecting to server",
+        };
+        if (error.response) {
+          snackBarData.message = error.response.data.message;
+        }
+        vuexContext.commit("snackBar", snackBarData, { root: true });
         vuexContext.commit("setLoggedIn", false);
+        this.app.context.error();
       }
     }
   },
   async signUp(vuexContext, signUpData) {
-    console.log(signUpData);
     try {
-      const res = await this.$axios.post(
+      await this.$axios.post(
         process.env.VUE_APP_API_URL + "/api/v1/users/signup",
         signUpData,
         { withCredentials: true }
       );
-      console.log(res);
       vuexContext.commit("setLoggedIn", true);
     } catch (err) {
       console.log(err);

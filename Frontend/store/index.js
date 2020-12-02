@@ -14,6 +14,6 @@ export const mutations = {
 
 export const actions = {
   async nuxtServerInit(vuexContext, context) {
-    await context.store.dispatch("auth/autoLogin");
+    await vuexContext.dispatch("auth/autoLogin");
   },
 };

@@ -9,11 +9,12 @@
         dark
         grow
       >
-        <v-tabs-slider color="purple darken-4"></v-tabs-slider>
+        <v-tabs-slider color="deep-purple accent-4"></v-tabs-slider>
         <v-tab v-for="(i, index) in tabs" :key="index">
           <v-icon large>{{ i.icon }}</v-icon>
           <span class="caption py-1">{{ i.name }}</span>
         </v-tab>
+
         <v-tab-item>
           <v-card class="px-4">
             <v-card-text>
@@ -132,6 +133,13 @@
           </v-card>
         </v-tab-item>
       </v-tabs>
+      <v-progress-linear
+        color="blue"
+        indeterminate
+        rounded
+        height="8"
+        v-if="isLoading"
+      ></v-progress-linear>
     </div>
   </div>
 </template>
@@ -140,6 +148,7 @@
 export default {
   data() {
     return {
+      isLoading: false,
       dialog: true,
       tab: 0,
       tabs: [
@@ -180,11 +189,13 @@ export default {
   methods: {
     async login() {
       if (this.$refs.loginForm.validate()) {
+        this.isLoading = true;
         const loginData = {
           email: this.loginEmail,
           password: this.loginPassword,
         };
         const request = await this.$store.dispatch("auth/login", loginData);
+        this.isLoading = false;
         if (request === "error") {
           return;
         }
@@ -201,6 +212,7 @@ export default {
     async signUp() {
       if (this.$refs.registerForm.validate()) {
         try {
+          this.isLoading = true;
           const signUpData = {
             firstName: this.firstName,
             lastName: this.lastName,

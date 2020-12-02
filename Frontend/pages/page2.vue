@@ -1,5 +1,7 @@
 <template>
   <v-row>
-    <v-col> </v-col>
+    <v-col>
+      <p>Page 2</p>
+    </v-col>
   </v-row>
 </template>

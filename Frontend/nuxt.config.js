@@ -57,6 +57,11 @@ export default {
     },
   },
   router: {},
+  loading: {
+    color: "#fa923f",
+    height: "4px",
+    duration: 5000,
+  },
 
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {},

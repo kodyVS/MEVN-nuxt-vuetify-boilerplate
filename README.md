@@ -53,17 +53,17 @@ $ npm run serve
 ```
 
 comes with
-Nodejs
-express
-mongodb
-jwt/cookie authentiation
-route protection
-User model
-User roles of admin and user stored in the jwt
-error handling
-environment variables
-Encrypted password database storage
-factory handler for mongoose requests
+Nodejs,
+express,
+mongodb,
+jwt/cookie authentiation,
+route protection,
+User model,
+User roles of admin and user stored in the JWT,
+error handling,
+environment variables,
+Encrypted password database storage,
+factory handler for mongoose requests,
 
 .env should be included in the /API directory with the following information
 
