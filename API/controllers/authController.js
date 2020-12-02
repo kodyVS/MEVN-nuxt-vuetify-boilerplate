@@ -7,7 +7,6 @@ const AppError = require("../utils/appError");
 //const Email = require("../utils/email");
 
 const signToken = (id, userRole) => {
-  console.log(userRole);
   return jwt.sign({ id: id, userRole: userRole }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
@@ -123,7 +122,7 @@ exports.autoLogin = async (req, res, next) => {
   // 1) Getting token and check of it's there
   let token;
   if (req.headers.cookie === "jwt=loggedout") {
-    return next(new AppError("Something happened! Please log in again", 401));
+    return next(new AppError("You are not logged in", 401));
   } else if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -132,7 +131,7 @@ exports.autoLogin = async (req, res, next) => {
   } else if (req.headers.cookie) {
     token = req.headers.cookie.slice(4);
   } else if (!token) {
-    return next(new AppError("Something happened! Please log in again", 401));
+    return next(new AppError("You are not logged in", 401));
   } else {
     return next();
   }
