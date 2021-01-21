@@ -7,3 +7,8 @@
     </v-row>
   </v-container>
 </template>
+<style scoped>
+.backgroundcolor {
+  background-color: rgba(9, 48, 61, 0.466);
+}
+</style>

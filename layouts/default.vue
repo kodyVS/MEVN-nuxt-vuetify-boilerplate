@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app style="background-color: grey">
     <v-navigation-drawer
       v-model="drawer"
       :mini-variant="miniVariant"
@@ -28,6 +28,24 @@
       <v-app-bar-nav-icon color="white" @click.stop="drawer = !drawer" />
       <v-toolbar-title v-text="title" />
       <v-spacer />
+      <v-col cols="4">
+        <v-text-field
+          v-model="search"
+          append-icon="mdi-magnify"
+          label="Search for a server..."
+          single-line
+          hide-details
+          background-color="grey lighten-1"
+          rounded
+        ></v-text-field>
+      </v-col>
+      <v-btn color="green darken-1" class="white--text mr-12" rounded>
+        Search
+      </v-btn>
+      <v-btn outlined text class="white--text mr-2" dark rounded
+        >Create Group</v-btn
+      >
+      <v-icon large class="white--text mr-2">mdi-account</v-icon>
       <v-btn
         v-if="!loggedIn"
         @click="signIn = !signIn"
@@ -61,6 +79,7 @@ import { mapState } from "vuex";
 export default {
   data() {
     return {
+      search: "",
       clipped: true,
       drawer: false,
       fixed: false,
@@ -68,12 +87,12 @@ export default {
       items: [
         {
           icon: "mdi-apps",
-          title: "Welcome",
+          title: "Home",
           to: "/",
         },
         {
           icon: "mdi-chart-bubble",
-          title: "Page 2",
+          title: "New Server",
           to: "/page2",
         },
         {
@@ -90,7 +109,7 @@ export default {
       miniVariant: false,
       right: true,
       rightDrawer: false,
-      title: "Base App",
+      title: "TotalDiscord",
     };
   },
   computed: {
