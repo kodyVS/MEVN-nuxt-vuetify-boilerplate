@@ -20,13 +20,13 @@ $ npm run generate
 ```
 
 To generate snackbar's
-const snackBarData = {
+```javascript const snackBarData = {
 isSuccess: true,
 message: "Successfully logged in",
 };
 this.$store.commit("snackBar", snackBarData);
-
-Comes with
+```
+## Comes with
 Vue
 vuex
 nuxt
@@ -38,7 +38,7 @@ login and registering users
 nuxt serverside rendering
 dashboard and navigation
 
-Important VSCode extentions that I use:
+## Important VSCode extentions that I use:
 
 Debugger for Chrome
 EsLint
