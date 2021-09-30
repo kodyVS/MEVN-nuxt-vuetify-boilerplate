@@ -4,6 +4,8 @@
 
 In the /Frontend directory
 
+IMPORTANT: Must clear your localhost cookies before starting.
+
 ```bash
 # install dependencies
 $ npm install
