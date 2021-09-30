@@ -1,0 +1,17 @@
+version: '3.7'
+
+services:
+  nuxt-app:
+    build: ./API/
+    container_name: backend-template
+    restart: always
+    ports:
+      - '3001:3001'
+    command: 'npm run serve'
+  nuxt-app-front:
+    build: ./Frontend/
+    container_name: frontend
+    restart: always
+    ports:
+      - '2500:2500'
+    command: 'npm run start'
