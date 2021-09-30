@@ -48,3 +48,22 @@ Prettier
 Vue
 
 vsCode preference "format on save" is turned on
+
+## Run Command
+
+`sudo docker-compose up --build`
+
+## ENV File
+
+DATABASE_PASSWORD= `YOURDBPASS`
+
+DATABASE=`mongodb+srv://...`
+TEST=off
+TEST_DATABASE=`mongodb+srv://...`
+TEST_DATABASE_PASSWORD=
+PORT=3001
+NODE_ENV=development
+
+JWT_SECRET=`YOURJWTSECRET`
+JWT_EXPIRES_IN=90d
+JWT_COOKIE_EXPIRES_IN=90
