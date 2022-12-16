@@ -35,7 +35,10 @@ export default {
   // Modules (https://go.nuxtjs.dev/config-modules)
   modules: ["@nuxtjs/axios"],
   env: {
-    VUE_APP_API_URL: "http://localhost:3001",
+    VUE_APP_API_URL:
+      process.env.PRODUCTION === "false"
+        ? "http://localhost:3001"
+        : process.env.PRODUCTION_URL,
   },
 
   // Vuetify module configuration (https://go.nuxtjs.dev/config-vuetify)

@@ -26,52 +26,38 @@ export const actions = {
         vuexContext.commit("setLoggedIn", true);
       }
     } catch (error) {
-      const snackBarData = {
-        isError: true,
-        message: "Error in connecting to the server",
-      };
-      if (error.response) {
-        snackBarData.message = error.response.data.message;
-      }
-      vuexContext.commit("snackBar", snackBarData, { root: true });
-      return "error";
+      returnError(error, "Error in connecting the server", vuexContext);
+      throw new Error(error);
     }
   },
   async logOut(vuexContext) {
-    await this.$axios
-      .get(process.env.VUE_APP_API_URL + "/api/v1/users/logout", {
-        withCredentials: true,
-      })
-      .then(() => {
-        vuexContext.commit("setLoggedIn", false);
-      });
+    try {
+      await this.$axios.get(
+        process.env.VUE_APP_API_URL + "/api/v1/users/logout",
+        {
+          withCredentials: true,
+        }
+      );
+      vuexContext.commit("setLoggedIn", false);
+    } catch (error) {
+      returnError(error, "Error in connecting the server", vuexContext);
+      throw new Error(error);
+    }
   },
   async autoLogin(vuexContext) {
     if (!vuexContext.getters.isAuthenticated) {
       try {
-        await this.$axios
-          .get(process.env.VUE_APP_API_URL + "/api/v1/users/autoLogin", {
+        const res = await this.$axios.get(
+          process.env.VUE_APP_API_URL + "/api/v1/users/autoLogin",
+          {
             withCredentials: true,
-          })
-          .then((res) => {
-            if (res.data.status === "success") {
-              vuexContext.commit("setLoggedIn", true);
-            }
-          })
-          .catch((error) => {
-            throw error;
-          });
-      } catch (error) {
-        const snackBarData = {
-          isError: true,
-          message: "Error connecting to server",
-        };
-        if (error.response) {
-          snackBarData.message = error.response.data.message;
+          }
+        );
+        if (res.data.status === "success") {
+          vuexContext.commit("setLoggedIn", true);
         }
-        vuexContext.commit("snackBar", snackBarData, { root: true });
-        vuexContext.commit("setLoggedIn", false);
-        this.app.context.error();
+      } catch (error) {
+        returnError(error, "Error in connecting the server", vuexContext);
       }
     }
   },
@@ -83,8 +69,9 @@ export const actions = {
         { withCredentials: true }
       );
       vuexContext.commit("setLoggedIn", true);
-    } catch (err) {
-      console.log(err);
+    } catch (error) {
+      returnError(error, "Error in connecting the server", vuexContext);
+      throw new Error(error);
     }
   },
 };
@@ -92,4 +79,18 @@ export const getters = {
   isAuthenticated(state) {
     return state.loggedIn !== false;
   },
+};
+
+const returnError = (error, snackbarDefaultMessage, vuexContext) => {
+  const snackBarData = {
+    isError: true,
+    message: snackbarDefaultMessage,
+  };
+  if (error.response) {
+    snackBarData.message = error.response.data.message;
+  } else if (error) {
+    snackBarData.message = snackbarDefaultMessage;
+  }
+  vuexContext.commit("snackBar", snackBarData, { root: true });
+  return snackBarData;
 };

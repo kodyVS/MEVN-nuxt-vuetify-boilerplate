@@ -188,25 +188,26 @@ export default {
   },
   methods: {
     async login() {
-      if (this.$refs.loginForm.validate()) {
-        this.isLoading = true;
-        const loginData = {
-          email: this.loginEmail,
-          password: this.loginPassword,
-        };
-        const request = await this.$store.dispatch("auth/login", loginData);
-        this.isLoading = false;
-        if (request === "error") {
-          return;
+      try {
+        if (this.$refs.loginForm.validate()) {
+          this.isLoading = true;
+          const loginData = {
+            email: this.loginEmail,
+            password: this.loginPassword,
+          };
+          await this.$store.dispatch("auth/login", loginData);
+          this.isLoading = false;
+          this.$router.push("/");
+          this.$emit("signedIn");
+          this.loginPassword = "";
+          const snackBarData = {
+            isSuccess: true,
+            message: "Successfully logged in",
+          };
+          this.$store.commit("snackBar", snackBarData);
         }
-        this.$router.push("/");
-        this.$emit("signedIn");
-        this.loginPassword = "";
-        const snackBarData = {
-          isSuccess: true,
-          message: "Successfully logged in",
-        };
-        this.$store.commit("snackBar", snackBarData);
+      } catch (error) {
+        this.isLoading = false;
       }
     },
     async signUp() {
@@ -221,10 +222,15 @@ export default {
             passwordConfirm: this.passwordConfirm,
           };
           await this.$store.dispatch("auth/signUp", signUpData);
+          this.isLoading = false;
           this.$router.push("/");
           this.$emit("signedIn");
+          this.$store.commit("snackBar", {
+            isSuccess: true,
+            message: "Successfully signed up. Welcome!",
+          });
         } catch (error) {
-          console.log(error);
+          this.isLoading = false;
         }
       }
     },

@@ -1,17 +1,28 @@
-version: '3.7'
+version: "3.7"
 
 services:
-  nuxt-app:
-    build: ./API/
-    container_name: backend-template
-    restart: always
+  mongodb_boilerplate:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: docker
+      MONGO_INITDB_ROOT_PASSWORD: mongopw
     ports:
-      - '3001:3001'
-    command: 'npm run serve'
-  nuxt-app-front:
-    build: ./Frontend/
-    container_name: frontend
-    restart: always
-    ports:
-      - '2500:2500'
-    command: 'npm run start'
+      - 49101:27017
+    volumes:
+      - mongodb_boilerplate:/data/db
+  # nuxt-app:
+  #   build: ./API/
+  #   container_name: backend-template
+  #   restart: always
+  #   ports:
+  #     - "3001:3001"
+  #   command: "npm run serve"
+  # nuxt-app-front:
+  #   build: ./Frontend/
+  #   container_name: frontend
+  #   restart: always
+  #   ports:
+  #     - "2500:2500"
+  #   command: "npm run start"
+volumes:
+  mongodb_boilerplate:

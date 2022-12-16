@@ -6,7 +6,6 @@ IMPORTANT: Must clear your localhost cookies before starting.
 
 In the /Frontend directory
 
-
 ```bash
 # install dependencies
 $ npm install
@@ -23,13 +22,17 @@ $ npm run generate
 ```
 
 To generate snackbar's
-```javascript const snackBarData = {
-isSuccess: true,
-message: "Successfully logged in",
+
+```javascript
+const snackBarData = {
+  isSuccess: true,
+  message: "Successfully logged in",
 };
 this.$store.commit("snackBar", snackBarData);
 ```
+
 ## Comes with
+
 Vue
 vuex
 nuxt
