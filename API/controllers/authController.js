@@ -15,9 +15,7 @@ const signToken = (id, userRole) => {
 const createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id, user.userRole);
   res.cookie("jwt", token, {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
-    ),
+    expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
     httpOnly: true,
     secure: req.secure || req.headers["x-forwarded-proto"] === "https",
   });
@@ -47,7 +45,9 @@ exports.signup = catchAsync(async (req, res, next) => {
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
   }).catch((err) => {
-    console.log("error" + err);
+    if (err.code === 11000) {
+      return next(new AppError("User with this email already exists", 400));
+    }
   });
 
   if (!newUser) {
@@ -76,19 +76,14 @@ exports.login = catchAsync(async (req, res, next) => {
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check of it's there
   let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
     token = req.headers.authorization.split(" ")[1];
   } else if (req.headers.cookie) {
     token = req.headers.cookie.slice(4);
   }
 
   if (!token) {
-    return next(
-      new AppError("You are not logged in! Please log in to get access.", 401)
-    );
+    return next(new AppError("You are not logged in! Please log in to get access.", 401));
   }
 
   // 2) Verification token
@@ -96,19 +91,12 @@ exports.protect = catchAsync(async (req, res, next) => {
   // 3) Check if user still exists
   const currentUser = await User.findById(decoded.id);
   if (!currentUser) {
-    return next(
-      new AppError(
-        "The user belonging to this token does no longer exist.",
-        401
-      )
-    );
+    return next(new AppError("The user belonging to this token does no longer exist.", 401));
   }
 
   // 4) Check if user changed password after the token was issued
   if (currentUser.changedPasswordAfter(decoded.iat)) {
-    return next(
-      new AppError("User recently changed password! Please log in again.", 401)
-    );
+    return next(new AppError("User recently changed password! Please log in again.", 401));
   }
 
   // GRANT ACCESS TO PROTECTED ROUTE
@@ -116,24 +104,26 @@ exports.protect = catchAsync(async (req, res, next) => {
   res.locals.user = currentUser;
   next();
 });
-
 //AUTOLOG IN
 exports.autoLogin = async (req, res, next) => {
   // 1) Getting token and check of it's there
   let token;
-  if (req.headers.cookie === "jwt=loggedout") {
-    return next(new AppError("You are not logged in", 401));
-  } else if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
+
+  if (req.headers.cookie) {
+    let cookies = req.headers.cookie.split("; ");
+    cookies.forEach((cookie) => {
+      if (cookie === "jwt=loggedout") {
+        return next(new AppError("You are not logged in", 401));
+      }
+      if (cookie.slice(0, 4) === "jwt=") {
+        token = cookie.substring(4);
+      }
+    });
+  } else if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
     token = req.headers.authorization.split(" ")[1];
-  } else if (req.headers.cookie) {
-    token = req.headers.cookie.slice(4);
-  } else if (!token) {
+  }
+  if (!token) {
     return next(new AppError("You are not logged in", 401));
-  } else {
-    return next();
   }
 
   // 2) Verification token
@@ -160,10 +150,7 @@ exports.isLoggedIn = async (req, res, next) => {
   if (req.cookies.jwt) {
     try {
       // 1) verify token
-      const decoded = await promisify(jwt.verify)(
-        req.cookies.jwt,
-        process.env.JWT_SECRET
-      );
+      const decoded = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRET);
 
       // 2) Check if user still exists
       const currentUser = await User.findById(decoded.id);
@@ -190,9 +177,7 @@ exports.restrictTo = (...roles) => {
   return (req, res, next) => {
     // roles ['admin', 'lead-guide']. role='user'
     if (!roles.includes(req.user.role)) {
-      return next(
-        new AppError("You do not have permission to perform this action", 403)
-      );
+      return next(new AppError("You do not have permission to perform this action", 403));
     }
 
     next();
@@ -227,19 +212,13 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
 
-    return next(
-      new AppError("There was an error sending the email. Try again later!"),
-      500
-    );
+    return next(new AppError("There was an error sending the email. Try again later!"), 500);
   }
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on the token
-  const hashedToken = crypto
-    .createHash("sha256")
-    .update(req.params.token)
-    .digest("hex");
+  const hashedToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
 
   const user = await User.findOne({
     passwordResetToken: hashedToken,
