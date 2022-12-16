@@ -16,7 +16,10 @@ const cors = require("cors");
 //cors
 app.use(
   cors({
-    origin: "http://localhost:2500",
+    origin:
+      process.env.NODE_ENV === "development"
+        ? process.env.DEVELOPMENT_FRONTEND_URL
+        : process.env.PRODUCTION_FRONTEND_URL,
     credentials: true,
   })
 );
@@ -33,10 +36,7 @@ app.use(globalErrorHandler);
 
 //Setting up MongoDb server with mongoose
 if (process.env.TEST === "off") {
-  const DB = process.env.DATABASE.replace(
-    "<PASSWORD>",
-    process.env.DATABASE_PASSWORD
-  );
+  const DB = process.env.DATABASE.replace("<PASSWORD>", process.env.DATABASE_PASSWORD);
   mongoose
     .connect(DB, {
       useNewUrlParser: true,
@@ -46,10 +46,7 @@ if (process.env.TEST === "off") {
     })
     .then(() => console.log("DB connection successful!"));
 } else if (process.env.TEST === "on") {
-  const DB = process.env.TEST_DATABASE.replace(
-    "<PASSWORD>",
-    process.env.TEST_DATABASE_PASSWORD
-  );
+  const DB = process.env.TEST_DATABASE.replace("<PASSWORD>", process.env.TEST_DATABASE_PASSWORD);
   mongoose
     .connect(DB, {
       useNewUrlParser: true,
@@ -68,17 +65,19 @@ const server = app.listen(port, () => {
 module.exports = server;
 
 // Logging errors and temrinating program
-process.on("unhandledRejection", (err) => {
-  console.log("UNHANDLED REJECTION! 💥 Shutting down...");
-  console.log(err.name, err.message);
-  server.close(() => {
-    process.exit(1);
+if (process.env.NODE_ENV === "development") {
+  process.on("unhandledRejection", (err) => {
+    console.log("UNHANDLED REJECTION! 💥 Shutting down...");
+    console.log(err.name, err.message);
+    server.close(() => {
+      process.exit(1);
+    });
   });
-});
 
-process.on("SIGTERM", () => {
-  console.log("👋 SIGTERM RECEIVED. Shutting down gracefully");
-  server.close(() => {
-    console.log(" Process terminated!");
+  process.on("SIGTERM", () => {
+    console.log("👋 SIGTERM RECEIVED. Shutting down gracefully");
+    server.close(() => {
+      console.log(" Process terminated!");
+    });
   });
-});
+}

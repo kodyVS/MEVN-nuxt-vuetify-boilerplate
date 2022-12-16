@@ -61,22 +61,17 @@ vsCode preference "format on save" is turned on
 
 ## ENV File
 
-DATABASE_PASSWORD= `YOURDBPASS`
-
-DATABASE= `mongodb+srv://...`
-
+```
+DATABASE_PASSWORD=mongopw
+DATABASE=mongodb://docker:<PASSWORD>@localhost:49101
 TEST=off
-
-TEST_DATABASE= `mongodb+srv://...`
-
+TEST_DATABASE=
 TEST_DATABASE_PASSWORD=
-
 PORT=3001
-
 NODE_ENV=development
-
-JWT_SECRET= `YOURJWTSECRET`
-
+PRODUCTION_FRONTEND_URL=127.0.0.1
+DEVELOPMENT_FRONTEND_URL=http://localhost:2500
+JWT_SECRET=my-ultra-secure-and-ultra-long-secre1
 JWT_EXPIRES_IN=90d
-
 JWT_COOKIE_EXPIRES_IN=90
+```

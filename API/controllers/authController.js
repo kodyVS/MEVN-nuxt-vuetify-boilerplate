@@ -45,7 +45,6 @@ exports.signup = catchAsync(async (req, res, next) => {
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
   }).catch((err) => {
-    console.log(err.code);
     if (err.code === 11000) {
       return next(new AppError("User with this email already exists", 400));
     }
