@@ -1,0 +1,76 @@
+name: Deploy to Ubuntu server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Copy Frontend Files to Server
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.DEPLOYMENT_SSH_KEY }}
+          source: "Frontend/"
+          target: "/var/www/html/field-notes-app/"
+
+      - name: Install Frontend and Generate
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.DEPLOYMENT_SSH_KEY }}
+          script: |
+            cd /var/www/html/field-notes-app/Frontend
+            npm install
+            npm run generate
+
+      - name: Copy API Files to Server
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.DEPLOYMENT_SSH_KEY }}
+          source: "API/"
+          target: "/var/www/html/field-notes-app/"
+
+      - name: Install API Dependencies on Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.DEPLOYMENT_SSH_KEY }}
+          script: |
+            cd /var/www/html/field-notes-app/API
+            npm install
+
+      - name: Restart Nginx
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.DEPLOYMENT_SSH_KEY }}
+          script: sudo systemctl restart nginx
+
+      - name: Restart API
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.DEPLOYMENT_SSH_KEY }}
+          script: |
+            cd /var/www/html/field-notes-app/API
+            pm2 restart server.js

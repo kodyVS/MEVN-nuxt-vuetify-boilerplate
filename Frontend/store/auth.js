@@ -1,9 +1,15 @@
 export const state = () => ({
   loggedIn: false,
+  userId: "",
+  userRole: "",
+  userName: "",
 });
 export const mutations = {
-  setLoggedIn(state, loggedIn) {
-    state.loggedIn = loggedIn;
+  setLoggedIn(state, data) {
+    state.loggedIn = data.loggedIn;
+    state.userRole = data.userRole;
+    state.userID = data._id;
+    state.userName = `${data.firstName} ${data.lastName}`;
   },
   logOut(state) {
     state.loggedIn = false;
@@ -13,7 +19,7 @@ export const actions = {
   async login(vuexContext, loginData) {
     try {
       const res = await this.$axios.post(
-        process.env.VUE_APP_API_URL + "/api/v1/users/login",
+        process.env.API_URL + "/api/v1/users/login",
         {
           email: loginData.email,
           password: loginData.password,
@@ -23,22 +29,33 @@ export const actions = {
         }
       );
       if (res.data.status === "success") {
-        vuexContext.commit("setLoggedIn", true);
+        const data = { ...res.data.user, loggedIn: true };
+        vuexContext.commit("setLoggedIn", data);
+        return "success";
       }
     } catch (error) {
-      returnError(error, "Error in connecting the server", vuexContext);
+      console.log(error.message);
+      returnError(
+        error,
+        "Error in connecting the server, make sure you have service and hit refresh",
+        vuexContext
+      );
       throw new Error(error);
     }
   },
   async logOut(vuexContext) {
     try {
-      await this.$axios.get(
-        process.env.VUE_APP_API_URL + "/api/v1/users/logout",
-        {
-          withCredentials: true,
-        }
-      );
-      vuexContext.commit("setLoggedIn", false);
+      await this.$axios.get(process.env.API_URL + "/api/v1/users/logout", {
+        withCredentials: true,
+      });
+      const data = {
+        userRole: "",
+        userID: "",
+        firstName: "",
+        lastName: "",
+        loggedIn: false,
+      };
+      vuexContext.commit("setLoggedIn", data);
     } catch (error) {
       returnError(error, "Error in connecting the server", vuexContext);
       throw new Error(error);
@@ -48,27 +65,26 @@ export const actions = {
     if (!vuexContext.getters.isAuthenticated) {
       try {
         const res = await this.$axios.get(
-          process.env.VUE_APP_API_URL + "/api/v1/users/autoLogin",
+          process.env.API_URL + "/api/v1/users/autoLogin",
           {
             withCredentials: true,
           }
         );
         if (res.data.status === "success") {
-          vuexContext.commit("setLoggedIn", true);
+          const data = { ...res.data.user, loggedIn: true };
+          vuexContext.commit("setLoggedIn", data);
         }
-      } catch (error) {
-        returnError(error, "Error in connecting the server", vuexContext);
-      }
+      } catch (error) {}
     }
   },
   async signUp(vuexContext, signUpData) {
     try {
       await this.$axios.post(
-        process.env.VUE_APP_API_URL + "/api/v1/users/signup",
+        process.env.API_URL + "/api/v1/users/signup",
         signUpData,
         { withCredentials: true }
       );
-      vuexContext.commit("setLoggedIn", true);
+      return "User created";
     } catch (error) {
       returnError(error, "Error in connecting the server", vuexContext);
       throw new Error(error);
@@ -78,6 +94,16 @@ export const actions = {
 export const getters = {
   isAuthenticated(state) {
     return state.loggedIn !== false;
+  },
+  userRole(state) {
+    return state.userRole;
+  },
+  user(state) {
+    return {
+      name: state.userName,
+      role: state.userRole,
+      id: state.userID,
+    };
   },
 };
 
